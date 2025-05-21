@@ -42,11 +42,10 @@ def BFS(source, destination, depth):
     queue.append(source)
 
     while queue:
-        current = queue.pop(0)
-        print("Searching", current)
-        visited.append(deformat_url(current))
-        # print(visited)
-        adjacents = get_all_links(current, visited)
+        path = queue.pop(0)
+        print("Searching", path)
+        visited.append(deformat_url(path))
+        adjacents = get_all_links(path, visited)
 
         for link in adjacents:
             if link == destination:
