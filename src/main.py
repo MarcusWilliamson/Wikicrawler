@@ -33,6 +33,20 @@ def get_all_links(url, exclude):
             # print("adding", link)
     return links
 
+def trace_path(parents_dict, start):
+    current = start
+    path = []
+    while current:
+        if current == 'root':  # exit condition; found the top
+            return path
+        else:
+            next = parents_dict[current]
+            path.insert(0, current)
+            current = next
+    print("error")
+    path.insert(0, 'error')
+    return path
+
 # BFS algorithm that searches pages in its queue for "adjacent" links (links on the webpage). Excludes already-visited pages.
 # It searches starting with the source until it finds the destination and returns the path it took between them.
 # URLs are stored in format: /wiki/[TOPIC], full url only used for requests
@@ -40,8 +54,8 @@ def BFS(source, destination, depth):
     queue = []
     parents = {}
 
-    queue.append(deformat_url(source))
-    parents[deformat_url(source)] = 'root'
+    queue.append(source)
+    parents[source] = 'root'
 
     while queue:
         current = queue.pop(0)
@@ -51,11 +65,11 @@ def BFS(source, destination, depth):
         for link in adjacents:
             if link == destination:
                 print("found")
+                parents[link] = current
+                print(trace_path(parents, link))
                 return
             else:
                 queue.append(link)
                 parents[link] = current
 
-BFS(start_url, target_url, -1)
-
-#todo: debug using main_page as an example for duplicates
+BFS(deformat_url(start_url), deformat_url(target_url), -1)
