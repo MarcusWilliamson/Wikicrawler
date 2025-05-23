@@ -6,9 +6,7 @@ start_url, target_url = sys.argv[1], sys.argv[2]
 
 # Checks if a link is a valid wikipedia link, returns true or false.
 def is_valid_link(url):
-    if url is None:
-        return False
-    if not url.startswith('/wiki/'):
+    if url is None or ':' in url or not url.startswith('/wiki/'):
         return False
     return True
 
@@ -19,9 +17,10 @@ def deformat_url(url):
     return url.replace('https://en.wikipedia.org', '')
 
 # Gets all links from a page and returns a list of the valid ones. Expects string url and list of urls to exclude.
+# Input URLs are formatted without domain name
 def get_all_links(url, exclude):
 
-    request = requests.get(url)
+    request = requests.get(format_url(url))
     soup = BeautifulSoup(request.content, 'html.parser')
 
     links = []
@@ -29,23 +28,25 @@ def get_all_links(url, exclude):
         link = href.get('href')
         # if link in exclude:
             # print("EXCLUDE", link)
-        if is_valid_link(link) and link not in exclude:
-            links.append(format_url(link))
+        if is_valid_link(link) and link not in exclude and link not in links:
+            links.append(link)
             # print("adding", link)
     return links
 
-
+# BFS algorithm that searches pages in its queue for "adjacent" links (links on the webpage). Excludes already-visited pages.
+# It searches starting with the source until it finds the destination and returns the path it took between them.
+# URLs are stored in format: /wiki/[TOPIC], full url only used for requests
 def BFS(source, destination, depth):
     queue = []
-    visited = []
+    parents = {}
 
-    queue.append(source)
+    queue.append(deformat_url(source))
+    parents[deformat_url(source)] = 'root'
 
     while queue:
-        path = queue.pop(0)
-        print("Searching", path)
-        visited.append(deformat_url(path))
-        adjacents = get_all_links(path, visited)
+        current = queue.pop(0)
+        print("Searching", current)
+        adjacents = get_all_links(current, parents.keys())
 
         for link in adjacents:
             if link == destination:
@@ -53,5 +54,8 @@ def BFS(source, destination, depth):
                 return
             else:
                 queue.append(link)
+                parents[link] = current
 
 BFS(start_url, target_url, -1)
+
+#todo: debug using main_page as an example for duplicates
