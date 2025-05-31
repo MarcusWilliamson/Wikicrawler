@@ -1,6 +1,7 @@
 # import sys
 import requests
 from bs4 import BeautifulSoup
+import time
 
 # start_url, target_url = sys.argv[1], sys.argv[2]
 
@@ -76,14 +77,20 @@ def BFS(source, destination, depth):
                 queue.append(link)
                 parents[link] = current
 
+def convert_time(s):
+    min, sec = divmod(s, 60)
+    return str(int(min)) + (" minute" if min == 1 else " minutes") + " and " + str(sec) + " seconds"
 
 def main():
+    start_time = time.time()
     print("Enter a url to start from (full url please): ")
     start_url = input()
     print("Now enter a target url: ")
     target_url = input()
     path = BFS(deformat_url(start_url), deformat_url(target_url), -1)
     print(" -> ".join(path or []))
+    end_time = time.time()
+    print("Found result in " + convert_time(end_time - start_time))
 
 if __name__ == "__main__":
     main()
