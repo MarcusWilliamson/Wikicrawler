@@ -4,9 +4,12 @@ from bs4 import BeautifulSoup
 
 # start_url, target_url = sys.argv[1], sys.argv[2]
 
+BANNED_URLS = ['/wiki/Main_Page']
+
 # Checks if a link is a valid wikipedia link, returns true or false.
+# Excludes pages with ":" in the url and urls in the banned list.
 def is_valid_link(url):
-    if url is None or ':' in url or not url.startswith('/wiki/'):
+    if url is None or ':' in url or not url.startswith('/wiki/') or url in BANNED_URLS:
         return False
     return True
 
